@@ -1,38 +1,46 @@
 import React, {useEffect, useState} from 'react'
-import styles from './PeoplePage.module.css'
+import PropTypes from 'prop-types'
+// import styles from './PeoplePage.module.css'
 import {getApiResource} from "../../utils/network";
-import {SWAPI_PEOPLE, SWAPI_ROOT} from "../../constants/api";
+import {API_PEOPLE} from "../../constants/api";
+import {getPeopleId, getPeopleImage} from "../../services/getPeopleData";
+import PeopleList from "../../components/PeoplePage/PeopleList/PeopleList";
+import {withErrorApi} from "../../hoc-helpers/withErrorApi";
 
 
-const PeoplePage = () => {
+const PeoplePage = ({setErrorApi}) => {
     const [people, setPeople] = useState(null)
     const getResource = async (url) => {
         const res = await getApiResource(url)
 
-        const peopleList = res.results.map(({name, url}) => {
-            return {
-                name,
-                url
-            }
-        })
-        setPeople(peopleList)
+        if (res) {
+            const peopleList = res.results.map(({name, url}) => {
+                const id = getPeopleId(url)
+                const img = getPeopleImage(id)
+                return {
+                    name,
+                    id,
+                    img
+                }
+            })
+            setPeople(peopleList)
+            setErrorApi(false)
+        } else {
+            setErrorApi(true)
+        }
+
     }
     useEffect(() => {
-        getResource(`${SWAPI_ROOT}${SWAPI_PEOPLE}`)
+        getResource(`${API_PEOPLE}`)
     }, [])
     return (
         <>
-            {people &&
-            (<ul>
-                {people.map(({name, url}) => {
-                    return (
-                        <li key={name}>{name}</li>
-                    )
-                })}
-            </ul>)
-            }
-
+            <h1>Navigation</h1>
+            {people && <PeopleList people={people}/>}
         </>
     )
 }
-export default PeoplePage
+export default withErrorApi(PeoplePage)
+PeoplePage.propTypes = {
+    setErrorApi: PropTypes.func.isRequired
+}
