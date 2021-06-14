@@ -4,10 +4,14 @@ import {getApiResource} from "../../utils/network";
 import {withErrorApi} from "../../hoc-helpers/withErrorApi";
 import styles from './PersonPage.module.css'
 import {API_PERSON} from "../../constants/api";
+import {getPeopleImage} from "../../services/getPeopleData";
+import PersonPhoto from "../../components/PersonPage/PersonImage/PersonPhoto";
+import PersonInfo from "../../components/PersonPage/PersonInfo/PersonInfo";
 
 const PersonPage = ({match, setErrorApi}) => {
     const [personInfo, setPersonInfo] = useState(null)
     const [personName, setPersonName] = useState(null)
+    const [personPhoto, setPersonPhoto] = useState(null)
     useEffect(()=> {
         (async ()=> {
             const id = match.params.id
@@ -24,6 +28,7 @@ const PersonPage = ({match, setErrorApi}) => {
                     {title: 'Gender', data: res.gender},
                 ])
                 setPersonName(res.name)
+                setPersonPhoto(getPeopleImage(id))
             }else {
                 setErrorApi(true)
             }
@@ -31,16 +36,17 @@ const PersonPage = ({match, setErrorApi}) => {
     }, [])
 
     return (
-        <>
-            {personName}
-            {personInfo && (
-                <ul>
-                    {personInfo.map(({title, data})=> (
-                       data && (<li key={title}><span>{title}: {data}</span></li>) 
-                    ))}
-                </ul>
-            )}
-        </>
+        <div className={styles.wrapper}>
+            <span className={styles.person__name}>{personName}</span>
+            <div className={styles.container}>
+                <PersonPhoto personPhoto={personPhoto}/>
+
+                {personInfo && (
+                    <PersonInfo personInfo={personInfo}/>
+                )}
+            </div>
+
+        </div>
     )
 }
 export default withErrorApi(PersonPage)
