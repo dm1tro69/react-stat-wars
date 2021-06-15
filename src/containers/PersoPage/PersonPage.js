@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, Suspense} from 'react'
 import PropTypes from 'prop-types'
 import {getApiResource} from "../../utils/network";
 import {withErrorApi} from "../../hoc-helpers/withErrorApi";
@@ -7,11 +7,17 @@ import {API_PERSON} from "../../constants/api";
 import {getPeopleImage} from "../../services/getPeopleData";
 import PersonPhoto from "../../components/PersonPage/PersonImage/PersonPhoto";
 import PersonInfo from "../../components/PersonPage/PersonInfo/PersonInfo";
+import PersonLinkBack from "../../components/PersonPage/PersonLinkBack/PersonLinkBack";
+import UiLoading from "../../components/UI-Kit/UiLoading/UiLoading";
+// import PersonFilms from "../../components/PersonPage/PersonFilms/PersonFilms";
+
+const PersonFilms = React.lazy(()=> import("../../components/PersonPage/PersonFilms/PersonFilms"))
 
 const PersonPage = ({match, setErrorApi}) => {
     const [personInfo, setPersonInfo] = useState(null)
     const [personName, setPersonName] = useState(null)
     const [personPhoto, setPersonPhoto] = useState(null)
+    const [personFilms, setPersonFilms] = useState(null)
     useEffect(()=> {
         (async ()=> {
             const id = match.params.id
@@ -29,6 +35,12 @@ const PersonPage = ({match, setErrorApi}) => {
                 ])
                 setPersonName(res.name)
                 setPersonPhoto(getPeopleImage(id))
+
+
+
+                res.films.length && setPersonFilms(res.films)
+
+                setErrorApi(false)
             }else {
                 setErrorApi(true)
             }
@@ -36,6 +48,9 @@ const PersonPage = ({match, setErrorApi}) => {
     }, [])
 
     return (
+        <>
+
+            <PersonLinkBack/>
         <div className={styles.wrapper}>
             <span className={styles.person__name}>{personName}</span>
             <div className={styles.container}>
@@ -44,9 +59,17 @@ const PersonPage = ({match, setErrorApi}) => {
                 {personInfo && (
                     <PersonInfo personInfo={personInfo}/>
                 )}
+                {personFilms && (
+                    <Suspense fallback={<UiLoading/>}>
+                        <PersonFilms personFilms={personFilms}/>
+
+                    </Suspense>
+
+                ) }
             </div>
 
         </div>
+        </>
     )
 }
 export default withErrorApi(PersonPage)
