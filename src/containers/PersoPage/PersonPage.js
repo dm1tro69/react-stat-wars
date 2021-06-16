@@ -1,4 +1,5 @@
 import React, {useEffect, useState, Suspense} from 'react'
+import {useSelector} from "react-redux";
 import PropTypes from 'prop-types'
 import {getApiResource} from "../../utils/network";
 import {withErrorApi} from "../../hoc-helpers/withErrorApi";
@@ -9,20 +10,27 @@ import PersonPhoto from "../../components/PersonPage/PersonImage/PersonPhoto";
 import PersonInfo from "../../components/PersonPage/PersonInfo/PersonInfo";
 import PersonLinkBack from "../../components/PersonPage/PersonLinkBack/PersonLinkBack";
 import UiLoading from "../../components/UI-Kit/UiLoading/UiLoading";
+import {favoriteReducer} from "../../store/reducers/favotiteReducer";
 // import PersonFilms from "../../components/PersonPage/PersonFilms/PersonFilms";
 
 const PersonFilms = React.lazy(()=> import("../../components/PersonPage/PersonFilms/PersonFilms"))
 
 const PersonPage = ({match, setErrorApi}) => {
+
     const [personInfo, setPersonInfo] = useState(null)
     const [personName, setPersonName] = useState(null)
     const [personPhoto, setPersonPhoto] = useState(null)
     const [personFilms, setPersonFilms] = useState(null)
     const [personId, setPersonId] = useState(null)
+    const [personFavorite, setPersonFavorite] = useState(false)
+
+    const stateData = useSelector((state)=> state.favoriteReducer)
+
     useEffect(()=> {
         (async ()=> {
             const id = match.params.id
             const res = await getApiResource(`${API_PERSON}/${id}/`)
+            stateData[id]? setPersonFavorite(true): setPersonFavorite(false)
             setPersonId(id)
             if (res){
                 setErrorApi(false)
@@ -57,6 +65,8 @@ const PersonPage = ({match, setErrorApi}) => {
             <span className={styles.person__name}>{personName}</span>
             <div className={styles.container}>
                 <PersonPhoto
+                    setPersonFavorite={setPersonFavorite}
+                    personFavorite={personFavorite}
                     personId={personId}
                     personPhoto={personPhoto}
                     personName={personName}/>
