@@ -18,10 +18,12 @@ const PersonPage = ({match, setErrorApi}) => {
     const [personName, setPersonName] = useState(null)
     const [personPhoto, setPersonPhoto] = useState(null)
     const [personFilms, setPersonFilms] = useState(null)
+    const [personId, setPersonId] = useState(null)
     useEffect(()=> {
         (async ()=> {
             const id = match.params.id
             const res = await getApiResource(`${API_PERSON}/${id}/`)
+            setPersonId(id)
             if (res){
                 setErrorApi(false)
                 setPersonInfo([
@@ -54,7 +56,10 @@ const PersonPage = ({match, setErrorApi}) => {
         <div className={styles.wrapper}>
             <span className={styles.person__name}>{personName}</span>
             <div className={styles.container}>
-                <PersonPhoto personPhoto={personPhoto}/>
+                <PersonPhoto
+                    personId={personId}
+                    personPhoto={personPhoto}
+                    personName={personName}/>
 
                 {personInfo && (
                     <PersonInfo personInfo={personInfo}/>
